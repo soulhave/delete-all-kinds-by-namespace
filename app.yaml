@@ -1,0 +1,29 @@
+runtime: python27
+threadsafe: true
+api_version: 1
+instance_class: F4
+automatic_scaling:
+  min_idle_instances: 5
+  max_concurrent_requests: 2
+
+handlers:
+# The endpoints handler must be mapped to /_ah/spi.
+# Apps send requests to /_ah/api, but the endpoints service handles mapping
+# those requests to /_ah/spi.
+- url: /_ah/spi/.*
+  script: main.api
+
+- url: /task/.*
+  script: main.APP
+  login: admin
+  secure: always
+
+
+libraries:
+- name: pycrypto
+  version: 2.6
+- name: endpoints
+  version: 1.0
+
+builtins:
+- remote_api: on
