@@ -66,7 +66,7 @@ class DeleteKinds(webapp2.RequestHandler):
             else:
                 logging.info("[Namespace %s][Kind %s] No more registers.", namespace, kind)
 
-            ndb.delete_multi(keys)
+            ndb.delete_multi_async(keys)
             logging.info("[Namespace %s][Kind %s]Deleted keys --> %s", namespace, kind, keys)
 
         elif namespace:
