@@ -20,6 +20,7 @@ class DefaultResponse(messages.Message):
 class DefaultRequest(messages.Message):
     """Greeting that stores a message."""
     namespace = messages.StringField(1)
+    kind = messages.StringField(2)
 
 
 @endpoints.api(
@@ -36,8 +37,12 @@ class DatastoreManagerAPI(remote.Service):
         name='post')
     def delete_kind(self, request):
         namespace = request.namespace
+        kind = request.kind        
 
-        send_message_to_queye(namespace)
+        send_message_to_queye(namespace, kind)
+
+        if kind:
+            return DefaultResponse(message='Namespace: {} Kind: {}'.format(namespace, kind))
 
         return DefaultResponse(message=namespace)
 
@@ -57,7 +62,8 @@ class DeleteKinds(webapp2.RequestHandler):
         kind = self.request.get('kind', None)
 
         if namespace and kind:
-
+            namespace_manager.set_namespace(namespace)
+            
             cursor = Cursor(urlsafe=self.request.get('cursor', None))
             keys, cursor_next, more = ndb.Query(kind=kind).fetch_page(10000, keys_only=True, start_cursor=cursor)
 
@@ -66,7 +72,7 @@ class DeleteKinds(webapp2.RequestHandler):
             else:
                 logging.info("[Namespace %s][Kind %s] No more registers.", namespace, kind)
 
-            ndb.delete_multi_async(keys)
+            ndb.delete_multi(keys)
             logging.info("[Namespace %s][Kind %s]Deleted keys --> %s", namespace, kind, keys)
 
         elif namespace:
@@ -82,7 +88,7 @@ class DeleteKinds(webapp2.RequestHandler):
 
 
 def send_message_to_queye(namespace=None, kind=None, cursor=None):
-    queue_name = "delete-kinds-by-namespace"
+    queue_name = "delete-kinds-by-kind-namespace"
     queue_url = "/task/delete_kinds"
     queue = Queue(name=queue_name)
 
