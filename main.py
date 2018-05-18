@@ -66,7 +66,7 @@ class DeleteKinds(webapp2.RequestHandler):
             else:
                 logging.info("[Namespace %s][Kind %s] No more registers.", namespace, kind)
 
-            ndb.delete_multi_async(keys)
+            ndb.delete_multi(keys)
             logging.info("[Namespace %s][Kind %s]Deleted keys --> %s", namespace, kind, keys)
 
         elif namespace:
@@ -82,7 +82,7 @@ class DeleteKinds(webapp2.RequestHandler):
 
 
 def send_message_to_queye(namespace=None, kind=None, cursor=None):
-    queue_name = "delete-kinds-by-namespace"
+    queue_name = "worker-app-bulk-update"
     queue_url = "/task/delete_kinds"
     queue = Queue(name=queue_name)
 

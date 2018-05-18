@@ -18,6 +18,8 @@ handlers:
   login: admin
   secure: always
 
+inbound_services:
+- warmup
 
 libraries:
 - name: pycrypto
